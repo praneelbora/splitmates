@@ -92,7 +92,7 @@ export default function Navbar({setShowModal,showModal,fetchFriends}) {
           className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-[5000] outline-none focus:outline-none backdrop-blur-sm bg-[rgba(0,0,0,0.2)]"
           onClick={()=>setShowModal(false)}
         >
-          <div className="relative w-auto my-6 mx-auto max-w-[95vw] min-w-[80dvw] lg:min-w-[50dvw] h-auto px-3" onClick={(e) => e.stopPropagation()}>
+          <div className="relative my-6 mx-auto w-[95dvw] lg:w-[80dvw] xl:w-[40dvw] h-auto px-3" onClick={(e) => e.stopPropagation()}>
             {/*content*/}
             <div className="rounded-[24px] shadow-lg relative flex flex-col w-full bg-[#212121]">
               {/*header*/}

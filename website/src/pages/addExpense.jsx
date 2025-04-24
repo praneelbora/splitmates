@@ -4,12 +4,11 @@ import MainLayout from '../layouts/mainLayout';
 import Modal from '../components/FriendsModal';
 
 const Friends = () => {
-  const { user, token } = useAuth();
-  console.log(user);
-  
+  const { token } = useAuth();
   const [friends, setFriends] = useState([]);
   const [filteredFriends, setFilteredFriends] = useState([]);
-  const [showModal, setShowModal] = useState(false);
+  const [filteredGroups, setFilteredGroups] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [val, setVal] = useState('');
   const [desc, setDesc] = useState('');
@@ -19,6 +18,7 @@ const Friends = () => {
   const [selectedFriends, setSelectedFriends] = useState([]);
 
   const [deleteConfirmMap, setDeleteConfirmMap] = useState({});
+  const [groupSelect, setGroupSelect] = useState();
 
 // Checks if "Me" is present
 const isMePresent = selectedFriends.some(f => f._id === 'me');
@@ -40,6 +40,21 @@ const handleRemoveFriend = (friend) => {
   }
 };
 
+// Remove a friend after confirmation
+const handleRemoveGroup = (group) => {
+  if (deleteConfirmMap[group._id]) {
+    setDeleteConfirmMap(prev => {
+      const copy = { ...prev };
+      delete copy[group._id];
+      return copy;
+    });
+      toggleGroupSelection(group)
+  } else {
+    setDeleteConfirmMap(prev => ({ ...prev, [group._id]: true }));
+  }
+};
+
+
 // Re-add "Me" to the list
 const addMe = () => {
   if (!isMePresent) {
@@ -57,6 +72,7 @@ const isPaidAmountValid = () => {
 
   return totalPaid === amount;
 };
+
 const handleSubmitExpense = async () => {
   const expenseData = {
     description: desc,
@@ -72,6 +88,10 @@ const handleSubmitExpense = async () => {
     }))
   };
 
+  if (groupSelect) {
+    expenseData.groupId = groupSelect._id; // Assuming groupSelect is an object with `_id`
+  }
+
   try {
     const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/expenses`, {
       method: 'POST',
@@ -85,12 +105,15 @@ const handleSubmitExpense = async () => {
     if (!response.ok) throw new Error('Failed to save expense');
     const data = await response.json();
     alert('Expense created successfully!');
-    setDesc('');            // Reset description input
-    setAmount(0);           // Reset amount
-    setMode('');            // Reset split mode
-    setSelectedFriends([]); // Reset selected friends
+    
+    // Reset all form states
+    setDesc('');
+    setAmount(0);
+    setMode('');
+    setSelectedFriends([]);
+    setGroupSelect(null); // Optional: reset group if desired
 
-    // Reset form or navigate
+    // Navigate or update UI here
   } catch (error) {
     console.error(error);
     alert('Error creating expense');
@@ -115,8 +138,6 @@ const getPaidAmountInfoBottom = () => {
 
   return remaining.toFixed(2);
 };
-
-
 
   const fetchFriends = async () => {
     try {
@@ -174,7 +195,9 @@ const getPaidAmountInfoBottom = () => {
   
   useEffect(() => {
     fetchFriends();
+    fetchGroups();
   }, []);
+
   const handleOweChange = (friendId, value) => {
     const updated = selectedFriends.map(f =>
       f._id === friendId ? { ...f, oweAmount: parseFloat(value) || 0 } : f
@@ -194,7 +217,6 @@ const getPaidAmountInfoBottom = () => {
     setSelectedFriends(updated);
   };
 
-  // Toggle between different modes (Equal, Value, Percent)
   const toggleMode = (newMode) => {
     setMode(newMode);
 
@@ -202,12 +224,37 @@ const getPaidAmountInfoBottom = () => {
 
     if (newMode === "equal") {
       // In Equal mode, distribute the total amount equally
-      const payers = updated.filter(f => f.owing);
-      const equalAmount = payers.length > 0 ? parseFloat((amount / payers.length).toFixed(2)) : 0;
+      const owingFriends = updated.filter(f => f.owing);
+            const numOwing = owingFriends.length;
+          
+            const equalAmount = numOwing > 0 ? Math.floor((amount / numOwing) * 100) / 100 : 0; // floor to 2 decimals
+            const totalSoFar = equalAmount * numOwing;
+            const leftover = parseFloat((amount - totalSoFar).toFixed(2)); // amount left due to rounding
+          
+            let count = 0;
+          
+            updated = updated.map((f) => {
+              if (!f.owing) return { ...f, oweAmount: 0, owePercent: undefined };
+          
+              count++;
+              let owe = equalAmount;
+              if (count === numOwing) {
+                owe = parseFloat((equalAmount + leftover).toFixed(2)); // last gets the leftover
+              }
+          
+              return {
+                ...f,
+                oweAmount: owe,
+                owePercent: undefined
+              };
+            });
 
-      updated = updated.map(f =>
-        f.owing ? { ...f, oweAmount: equalAmount, owePercent: undefined } : { ...f, oweAmount: 0, owePercent: undefined }
-      );
+      // const payers = updated.filter(f => f.owing);
+      // const equalAmount = payers.length > 0 ? parseFloat((amount / payers.length).toFixed(2)) : 0;
+
+      // updated = updated.map(f =>
+      //   f.owing ? { ...f, oweAmount: equalAmount, owePercent: undefined } : { ...f, oweAmount: 0, owePercent: undefined }
+      // );
     } else if (newMode === "percent") {
       // Reset to 0 oweAmount and use percent values
       updated = updated.map(f => ({
@@ -227,7 +274,41 @@ const getPaidAmountInfoBottom = () => {
     setSelectedFriends(updated);
   };
 
+  const toggleGroupSelection = (group) => {
+    const isSelected = group.selected;
+    console.log(group);
+    
+    // Deselect group
+    if (group._id==groupSelect?._id) {
+      const groupMemberIds = group.members.map(m => m._id);
+      const updated = selectedFriends.filter(f => !groupMemberIds.includes(f._id));
+      setSelectedFriends(updated);
+      setGroupSelect()
+    } else {
+      // Add group members if not already present
+      const newMembers = group.members.filter(
+        gm => !selectedFriends.some(f => f._id === gm._id)
+      ).map(gm => ({
+        ...gm,
+        paying: false,
+        owing: false,
+        payAmount: 0,
+        oweAmount: 0,
+        owePercent: 0
+      }));
+      setSelectedFriends([...selectedFriends, ...newMembers]);
+      setGroupSelect(group)
+    }
+  
+    // Toggle group selected state
+    const updatedGroups = groups.map(g =>
+      g._id === group._id ? { ...g, selected: !isSelected } : g
+    );
+    setGroups(updatedGroups);
+  };
+  
 
+  
   const friendFilter = (val) => {
     const lowerVal = val.toLowerCase();
     let filtered = friends.map(friend => ({
@@ -318,23 +399,61 @@ const getPaidAmountInfoBottom = () => {
     return '';
   };
   
-  
+  const fetchGroups = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/groups/`, {
+        headers: {
+          "Content-Type": "application/json",
+          'x-auth-token': token,
+        },
+      });
+
+      if (!response.ok){
+        throw new Error("Failed to fetch groups");
+      }
+      else{
+        const data = await response.json();
+        if(data.length>0){
+          console.log(data);
+          setGroups(data);
+        }
+      }
+
+    } catch (error) {
+      console.error("Error loading groups:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const groupFilter = (val) => {
+    const lowerVal = val.toLowerCase();
+    let filtered = groups.map(group => ({
+      ...group
+    }))
+    .filter(group =>
+      group.name.toLowerCase().includes(lowerVal)
+    );
+    setFilteredGroups(filtered);
+  };
+  useEffect(()=>{
+    groupFilter('')
+  },[groups])
   useEffect(() => {
     friendFilter('');
   }, [friends]);
 
   return (
     <MainLayout>
-      <div className="max-h-screen bg-[#121212] text-[#EBF1D5] p-6 overflow-hidden">
+      <div className="max-h-screen bg-[#121212] text-[#EBF1D5] overflow-hidden">
         <div className="flex flex-row justify-between">
           <h1 className="text-3xl font-bold mb-6">Add Expense</h1>
         </div>
-        <input
+        {!groupSelect && <input
       className="w-full bg-[#1f1f1f] text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
-          placeholder="Search For Friends"
+          placeholder="Search For Friends / Groups"
           value={val}
           onChange={(e) => setVal(e.target.value)}
-        />
+        />}
         {loading ? (
           <p>Loading friends...</p>
         ) : filteredFriends.length === 0 ? (
@@ -342,7 +461,29 @@ const getPaidAmountInfoBottom = () => {
         ) : (
           <div className="flex w-full flex-col">
             {(selectedFriends.length === 0 || val.length > 0) && (
-              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 px-2 mt-4`}>
+              <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-2 mt-4`}>
+                <div>
+                {groups.length>0 && <p className="uppercae text-[14px] text-[#EBF1D5] w-full mb-1">GROUPS</p>}
+                {filteredGroups.map((group) => (
+                  <div className="flex flex-col gap-2" key={group._id}>
+                    <div
+                      className={`flex flex-row w-full justify-between items-center cursor-pointer`}
+                      onClick={() => toggleGroupSelection(group)}
+                    >
+                      <div className="flex flex-col">
+                        <h2 className="text-xl capitalize text-[#EBF1D5] flex flex-row items-center gap-2">
+                          {group.name}
+                        </h2>
+                      </div>
+                    </div>
+                    <hr />
+                  </div>
+                ))}
+
+
+                </div>
+                <div>
+                {filteredFriends.length>0 && <p className="uppercae text-[14px] text-[#EBF1D5] mb-1">FRIENDS</p>}
                 {filteredFriends.map((friend) => (
                   <div className="flex flex-col gap-2" onClick={() => toggleFriendSelection(friend)} key={friend._id}>
                     <div className="flex flex-row w-full justify-between items-center">
@@ -354,26 +495,45 @@ const getPaidAmountInfoBottom = () => {
                     <hr />
                   </div>
                 ))}
+                </div>
               </div>
             )}
             <div className="flex flex-wrap my-4 gap-2">
-            {selectedFriends.map((friend) => (
-    <div
-      key={'selected' + friend._id}
-      className="flex w-min items-center h-[30px] gap-2 ps-3 overflow-hidden rounded-xl border border-[#81827C] text-sm text-[#EBF1D5]"
-    >
-      <p className="capitalize">{friend.name}</p>
-      <button
-        onClick={() => handleRemoveFriend(friend)}
-        className={`px-2 h-full -mt-[2px] ${
-          deleteConfirmMap[friend._id] ? 'bg-red-500' : 'bg-transparent'
-        }`}
-      >
-        ×
-      </button>
-    </div>
-  ))}
-  <div className="flex grow justify-end ms-16">
+            {!groupSelect && selectedFriends.map((friend) => (
+                  <div
+                    key={'selected' + friend._id}
+                    className="flex w-min items-center h-[30px] gap-2 ps-3 overflow-hidden rounded-xl border border-[#81827C] text-sm text-[#EBF1D5]"
+                  >
+                    <p className="capitalize">{friend.name}</p>
+                    <button
+                      onClick={() => handleRemoveFriend(friend)}
+                      className={`px-2 h-full -mt-[2px] ${
+                        deleteConfirmMap[friend._id] ? 'bg-red-500' : 'bg-transparent'
+                      }`}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {groupSelect && (<>
+                  <p className="uppercae text-[14px] text-[#EBF1D5] w-full mb-1">GROUP SELECTED</p>
+                  <div
+                    key={'selected' + groupSelect._id}
+                    className="flex w-min items-center h-[30px] gap-2 ps-3 overflow-hidden rounded-xl border border-[#81827C] text-sm text-[#EBF1D5]"
+                  >
+                    <p className="capitalize">{groupSelect.name}</p>
+                    <button
+                      onClick={() => handleRemoveGroup(groupSelect)}
+                      className={`px-2 h-full -mt-[2px] ${
+                        deleteConfirmMap[groupSelect._id] ? 'bg-red-500' : 'bg-transparent'
+                      }`}
+                    >
+                      ×
+                    </button>
+                  </div>
+                  </>)}
+
+  {!groupSelect && <div className="flex grow justify-end ms-16">
   {/* Add Me Button */}
   {!isMePresent && (
     <button
@@ -383,7 +543,7 @@ const getPaidAmountInfoBottom = () => {
       + Add Me
     </button>
   )}
-                </div>
+                </div>}
                 </div>
 
             {selectedFriends.length > 0 && val === '' && (
@@ -432,13 +592,31 @@ const getPaidAmountInfoBottom = () => {
 
           // Distribute payAmounts equally
           const payers = updated.filter(f => f.paying);
-          const equalAmount = payers.length > 0 ? parseFloat((amount / payers.length).toFixed(2)) : 0;
-
-          updated = updated.map(f =>
-            f.paying ? { ...f, payAmount: equalAmount } : { ...f, payAmount: 0 }
-          );
-
+          const numPayers = payers.length;
+          
+          const equalAmount = numPayers > 0 ? Math.floor((amount / numPayers) * 100) / 100 : 0;
+          const totalSoFar = equalAmount * numPayers;
+          const leftover = parseFloat((amount - totalSoFar).toFixed(2)); // leftover due to rounding
+          
+          let count = 0;
+          
+          updated = updated.map(f => {
+            if (!f.paying) return { ...f, payAmount: 0 };
+          
+            count++;
+            let pay = equalAmount;
+            if (count === numPayers) {
+              pay = parseFloat((equalAmount + leftover).toFixed(2)); // last one covers the rounding diff
+            }
+          
+            return {
+              ...f,
+              payAmount: pay
+            };
+          });
+          
           setSelectedFriends(updated);
+          
         }}
         className={`px-3 py-1 rounded-xl border-2 cursor-pointer transition-all text-sm ${
           paying ? 'bg-green-300 text-black border-green-300' : 'bg-transparent text-[#EBF1D5] border-[#81827C]'
@@ -506,11 +684,32 @@ const getPaidAmountInfoBottom = () => {
           // Update selected friends and distribute amounts if needed
           const payers = updated.filter(f => f.owing);
           if (mode === "equal") {
-            const equalAmount = payers.length > 0 ? parseFloat((amount / payers.length).toFixed(2)) : 0;
-            updated = updated.map(f =>
-              f.owing ? { ...f, oweAmount: equalAmount, owePercent: undefined } : { ...f, oweAmount: 0, owePercent: undefined }
-            );
+            const owingFriends = updated.filter(f => f.owing);
+            const numOwing = owingFriends.length;
+          
+            const equalAmount = numOwing > 0 ? Math.floor((amount / numOwing) * 100) / 100 : 0; // floor to 2 decimals
+            const totalSoFar = equalAmount * numOwing;
+            const leftover = parseFloat((amount - totalSoFar).toFixed(2)); // amount left due to rounding
+          
+            let count = 0;
+          
+            updated = updated.map((f) => {
+              if (!f.owing) return { ...f, oweAmount: 0, owePercent: undefined };
+          
+              count++;
+              let owe = equalAmount;
+              if (count === numOwing) {
+                owe = parseFloat((equalAmount + leftover).toFixed(2)); // last gets the leftover
+              }
+          
+              return {
+                ...f,
+                oweAmount: owe,
+                owePercent: undefined
+              };
+            });
           }
+          
 
           setSelectedFriends(updated);
         }}

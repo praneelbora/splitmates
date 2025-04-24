@@ -40,7 +40,7 @@ const Friends = () => {
 
   return (
     <MainLayout>    
-        <div className="max-h-screen bg-[#121212] text-[#EBF1D5] p-6 overflow-hidden">
+        <div className="max-h-screen bg-[#121212] text-[#EBF1D5] overflow-hidden">
           <div className="flex flex-row justify-between">
         <h1 className="text-3xl font-bold mb-6">Friends</h1>
             <button className="border-[1px] h-[40px] px-2 rounded-md" onClick={()=>setShowModal(true)}>Add New</button>
@@ -54,8 +54,9 @@ const Friends = () => {
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {friends.map((friend,index) => (
-                <div key={friend._id}>
+                <div key={friend._id} className="flex flex-col gap-2">
                 <h2 className="text-xl font-semibold">{friend.name}</h2>
+                <hr />
                 </div>
             ))}
             </div>

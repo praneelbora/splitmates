@@ -10,7 +10,7 @@ const MainLayout = ({ children }) => {
       {!isMobile && <SideNavbar />}
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {isMobile && <MobileNavbar />}
-        <main style={{ padding: isMobile ? '1rem' : '2rem' }}>{children}</main>
+        <main style={{ paddingBlock: isMobile ? '2rem' : '2rem' ,paddingInline: isMobile ? '1.5rem' : '1.5rem'}}>{children}</main>
       </div>
     </div>
   );

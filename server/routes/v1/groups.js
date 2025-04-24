@@ -1,37 +1,86 @@
 const express = require('express');
 const router = express.Router();
+const Group = require('../../models/Group');
 const User = require('../../models/User');
-const bcrypt = require('bcryptjs');
+const { verifyToken } = require('../../middleware/auth');
 
-const jwt = require('jsonwebtoken');
-
-// Register
-router.get('/groups', async (req, res) => {
-  const { name, email, password } = req.body;
+// ✅ CREATE GROUP
+router.post('/', verifyToken, async (req, res) => {
+  const { name, memberIds } = req.body;
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
-    await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
+    const group = new Group({
+      name,
+      members: [...memberIds, req.user.id], // Include the creator
+      createdBy: req.user.id
+    });
+
+    await group.save();
+    res.status(201).json(group);
+  } catch (error) {
+    console.log('groups/ error: ', error);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// ✅ GET GROUP BY ID
+router.get('/:groupId', verifyToken, async (req, res) => {
+  try {
+    const group = await Group.findById(req.params.groupId)
+      .populate('members', 'name email') // Only get name & email
+      .populate('createdBy', 'name email');
+
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+
+    res.json(group);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+router.get('/', verifyToken, async (req, res) => {
+  try {
+    const groups = await Group.find({ members: req.user.id })
+      .populate('members', 'name email')
+      .populate('createdBy', 'name email');
+
+    res.json(groups);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 });
 
-// Login
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+// ✅ ADD MEMBER TO GROUP
+router.put('/:groupId/add', verifyToken, async (req, res) => {
+  const { memberId } = req.body;
+
   try {
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    const group = await Group.findById(req.params.groupId);
+    if (!group) return res.status(404).json({ error: 'Group not found' });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
+    if (!group.members.includes(memberId)) {
+      group.members.push(memberId);
+      await group.save();
+    }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    res.json(group);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// ✅ REMOVE MEMBER FROM GROUP
+router.put('/:groupId/remove', verifyToken, async (req, res) => {
+  const { memberId } = req.body;
+
+  try {
+    const group = await Group.findById(req.params.groupId);
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+
+    group.members = group.members.filter(id => id.toString() !== memberId);
+    await group.save();
+
+    res.json(group);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 

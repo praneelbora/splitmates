@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
 import MainLayout from '../layouts/mainLayout';
-
+import Modal from '../components/groupsModal';
+import { useNavigate } from "react-router";
 const Groups = () => {
+  const navigate = useNavigate();
+
   const { token } = useAuth();
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
   const fetchGroups = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/getGroups`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/groups/`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          'x-auth-token': token,
         },
       });
 
@@ -21,8 +25,11 @@ const Groups = () => {
       }
       else{
         const data = await response.json();
-        if(data.length>0)
-        setGroups(data);
+        if(data.length>0){
+          console.log(data);
+          
+          setGroups(data);
+        }
       }
 
     } catch (error) {
@@ -38,28 +45,32 @@ const Groups = () => {
 
   return (
     <MainLayout>    
-        <div className="min-h-screen bg-[#121212] text-[#EBF1D5] p-6">
+        <div className="max-h-screen bg-[#121212] text-[#EBF1D5]">
         <div className="flex flex-row justify-between">
         <h1 className="text-3xl font-bold mb-6">Groups</h1>
-            <p>Add New</p>
+            <button className="border-[1px] h-[40px] px-2 rounded-md" onClick={()=>setShowModal(true)}>Add New</button>
           </div>
         {loading ? (
             <p>Loading groups...</p>
         ) : groups.length === 0 ? (
             <p>No groups found.</p>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {groups.map((expense) => (
-                <div key={expense._id} className="bg-[#1E1E1E] p-4 rounded shadow">
-                <h2 className="text-xl font-semibold">{expense.title}</h2>
-                <p className="text-gray-400">Amount: ₹{expense.amount}</p>
-                <p className="text-sm text-gray-500">Category: {expense.category}</p>
-                <p className="text-sm text-gray-500">Date: {new Date(expense.date).toLocaleDateString()}</p>
-                </div>
-            ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+            {groups.map((group) => (
+            <div
+              key={group._id}
+              onClick={() => navigate(`/groups/${group._id}`)}
+              className="flex flex-col gap-2 cursor-pointer hover:bg-[#1f1f1f] pb-3 rounded-md transition"
+            >
+              <h2 className="text-xl font-semibold">{group.name}</h2>
+              <hr />
+            </div>
+          ))}
             </div>
         )}
         </div>
+                <Modal setShowModal={setShowModal} showModal={showModal}/>
+        
     </MainLayout>
   );
 };

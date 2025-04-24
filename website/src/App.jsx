@@ -5,6 +5,7 @@ import Groups from "./pages/groups";
 import Friends from "./pages/friends";
 import AddExpense from "./pages/addExpense";
 import { useAuth } from "./context/authContext";
+import GroupDetails from './pages/GroupDetails';
 
 function PrivateRoute({ children }) {
   const { token } = useAuth();
@@ -29,6 +30,14 @@ function App() {
         element={
           <PrivateRoute>
             <Groups />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/groups/:id"
+        element={
+          <PrivateRoute>
+            <GroupDetails />
           </PrivateRoute>
         }
       />
