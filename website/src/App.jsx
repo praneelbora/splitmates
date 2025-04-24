@@ -5,7 +5,7 @@ import Groups from "./pages/groups";
 import Friends from "./pages/friends";
 import AddExpense from "./pages/addExpense";
 import { useAuth } from "./context/authContext";
-import GroupDetails from './pages/groupDetails';
+import GroupDetails from './pages/GroupDetails';
 
 function PrivateRoute({ children }) {
   const { token } = useAuth();
