@@ -29,7 +29,6 @@ export default function Register() {
       className="bg-[#1f1f1f] text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
 
               type="text"
-              className="w-full p-2 mt-1"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -41,7 +40,6 @@ export default function Register() {
       className="bg-[#1f1f1f] text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
 
               type="email"
-              className="w-full p-2 mt-1"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -53,7 +51,6 @@ export default function Register() {
       className="bg-[#1f1f1f] text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
 
               type="password"
-              className="w-full p-2 mt-1 bg-gray-700 rounded border border-gray-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

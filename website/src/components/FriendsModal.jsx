@@ -11,7 +11,7 @@ export default function Navbar({setShowModal,showModal,fetchFriends}) {
   const [received,setreceived] = useState([])
   const addFriend = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/friends/request`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/friends/request`, {
         headers: {
           "Content-Type": "application/json",
           'x-auth-token': token
@@ -36,7 +36,7 @@ export default function Navbar({setShowModal,showModal,fetchFriends}) {
   };
   const sentRequests = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/friends/sent`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/friends/sent`, {
         headers: {
           "Content-Type": "application/json",
           'x-auth-token': token
@@ -61,7 +61,7 @@ export default function Navbar({setShowModal,showModal,fetchFriends}) {
   };
   const receivedRequests = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/friends/received`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/friends/received`, {
         headers: {
           "Content-Type": "application/json",
           'x-auth-token': token

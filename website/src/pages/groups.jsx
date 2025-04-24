@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
 import MainLayout from '../layouts/mainLayout';
-import Modal from '../components/groupsModal';
+import Modal from '../components/GroupsModal';
 import { useNavigate } from "react-router";
 const Groups = () => {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ const Groups = () => {
 
   const fetchGroups = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/groups/`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/groups/`, {
         headers: {
           "Content-Type": "application/json",
           'x-auth-token': token,

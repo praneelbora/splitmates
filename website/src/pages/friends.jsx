@@ -11,7 +11,7 @@ const Friends = () => {
 
   const fetchFriends = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/friends/`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/friends/`, {
         headers: {
           "Content-Type": "application/json",
           'x-auth-token': token,

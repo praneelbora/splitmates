@@ -21,7 +21,7 @@ const MobileNavbar = () => {
             <Link to="/friends" className="hover:text-teal-300">Friends</Link>   
             <Link to="/groups" className="hover:text-teal-300">Groups</Link>   
             <Link to="/add-expense" className="hover:text-teal-300">Add Expense</Link>   
-            <Link to="/account" className="hover:text-teal-300">Account</Link>   
+            {/* <Link to="/account" className="hover:text-teal-300">Account</Link>    */}
 
         </div>
 </div>

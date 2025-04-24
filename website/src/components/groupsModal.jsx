@@ -52,7 +52,7 @@ const handleRemoveFriend = (friend) => {
 
     const fetchFriends = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/friends/`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/friends/`, {
           headers: {
             "Content-Type": "application/json",
             'x-auth-token': token,
@@ -118,7 +118,7 @@ const handleRemoveFriend = (friend) => {
       try {
         setIsLoading(true);
     
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/groups/`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/groups/`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

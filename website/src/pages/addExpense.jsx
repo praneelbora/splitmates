@@ -93,7 +93,7 @@ const handleSubmitExpense = async () => {
   }
 
   try {
-    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/expenses`, {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/expenses`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ const getPaidAmountInfoBottom = () => {
 
   const fetchFriends = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/friends/`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/friends/`, {
         headers: {
           "Content-Type": "application/json",
           'x-auth-token': token,
@@ -401,7 +401,7 @@ const getPaidAmountInfoBottom = () => {
   
   const fetchGroups = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/v1/groups/`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/v1/groups/`, {
         headers: {
           "Content-Type": "application/json",
           'x-auth-token': token,
@@ -483,7 +483,7 @@ const getPaidAmountInfoBottom = () => {
 
                 </div>
                 <div>
-                {filteredFriends.length>0 && <p className="uppercae text-[14px] text-[#EBF1D5] mb-1">FRIENDS</p>}
+                {/* {filteredFriends.length>0 && <p className="uppercae text-[14px] text-[#EBF1D5] mb-1">FRIENDS</p>}
                 {filteredFriends.map((friend) => (
                   <div className="flex flex-col gap-2" onClick={() => toggleFriendSelection(friend)} key={friend._id}>
                     <div className="flex flex-row w-full justify-between items-center">
@@ -494,12 +494,12 @@ const getPaidAmountInfoBottom = () => {
                     </div>
                     <hr />
                   </div>
-                ))}
+                ))} */}
                 </div>
               </div>
             )}
             <div className="flex flex-wrap my-4 gap-2">
-            {!groupSelect && selectedFriends.map((friend) => (
+            {/* {!groupSelect && selectedFriends.map((friend) => (
                   <div
                     key={'selected' + friend._id}
                     className="flex w-min items-center h-[30px] gap-2 ps-3 overflow-hidden rounded-xl border border-[#81827C] text-sm text-[#EBF1D5]"
@@ -514,7 +514,7 @@ const getPaidAmountInfoBottom = () => {
                       ×
                     </button>
                   </div>
-                ))}
+                ))} */}
                 {groupSelect && (<>
                   <p className="uppercae text-[14px] text-[#EBF1D5] w-full mb-1">GROUP SELECTED</p>
                   <div
@@ -533,17 +533,16 @@ const getPaidAmountInfoBottom = () => {
                   </div>
                   </>)}
 
-  {!groupSelect && <div className="flex grow justify-end ms-16">
-  {/* Add Me Button */}
-  {!isMePresent && (
-    <button
-      onClick={addMe}
-      className="text-sm border border-[#EBF1D5] text-[#EBF1D5] px-3 py-1 rounded-xl hover:bg-[#3a3a3a] transition"
-    >
-      + Add Me
-    </button>
-  )}
-                </div>}
+                  {/* {!groupSelect && <div className="flex grow justify-end ms-16">
+                  {!isMePresent && (
+                    <button
+                      onClick={addMe}
+                      className="text-sm border border-[#EBF1D5] text-[#EBF1D5] px-3 py-1 rounded-xl hover:bg-[#3a3a3a] transition"
+                    >
+                      + Add Me
+                    </button>
+                  )}
+                                </div>} */}
                 </div>
 
             {selectedFriends.length > 0 && val === '' && (

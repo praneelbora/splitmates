@@ -1,11 +1,11 @@
 import { Routes, Route, Navigate } from "react-router";
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import Register from "./pages/register";
 import Groups from "./pages/groups";
 import Friends from "./pages/friends";
 import AddExpense from "./pages/addExpense";
 import { useAuth } from "./context/authContext";
-import GroupDetails from './pages/GroupDetails';
+import GroupDetails from './pages/groupDetails';
 
 function PrivateRoute({ children }) {
   const { token } = useAuth();
