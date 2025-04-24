@@ -23,7 +23,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen min-w-full flex items-center justify-center  text-[#EBF1D5]">
-      <div className="w-full p-8 space-y-6  rounded-lg shadow-md flex flex-col justify-center">
+      <div className="w-full p-8 space-y-6  rounded-lg shadow-md flex flex-col justify-center items-center" >
         <h2 className="text-2xl font-bold text-center">Splitmates Login</h2>
         <form onSubmit={handleLogin} className="space-y-4 lg:w-[50%]">
           <div>

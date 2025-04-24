@@ -26,7 +26,7 @@ export default function Register() {
           <div>
             <label>Name</label>
             <input
-      className="bg-[#1f1f1f] text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
+      className="bg-[#1f1f1f] w-full mt-1 text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
 
               type="text"
               value={name}
@@ -37,7 +37,7 @@ export default function Register() {
           <div>
             <label>Email</label>
             <input
-      className="bg-[#1f1f1f] text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
+      className="bg-[#1f1f1f] w-full mt-1 text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
 
               type="email"
               value={email}
@@ -48,7 +48,7 @@ export default function Register() {
           <div>
             <label>Password</label>
             <input
-      className="bg-[#1f1f1f] text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
+      className="bg-[#1f1f1f] w-full mt-1 text-[#EBF1D5] border border-[#55554f] rounded-md p-2 text-base min-h-[40px] pl-3 flex-1"
 
               type="password"
               value={password}
