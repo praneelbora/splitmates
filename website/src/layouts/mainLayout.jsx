@@ -1,7 +1,7 @@
 // MainLayout.jsx
 import React from 'react';
-import MobileNavbar from './MobileNavbar';
-import SideNavbar from './SideNavbar';
+import MobileNavbar from './mobileNavbar';
+import SideNavbar from './sideNavbar';
 import { isMobile } from 'react-device-detect';
 
 const MainLayout = ({ children }) => {
