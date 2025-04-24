@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/authContext";
 import MainLayout from '../layouts/mainLayout';
-import Modal from '../components/GroupsModal';
+import Modal from '../components/groupsModal';
 import { useNavigate } from "react-router";
 const Groups = () => {
   const navigate = useNavigate();
